@@ -7,12 +7,9 @@ module.exports = {
 		"auth": true/false						--- Boolean to protect a route with JWT auth
 	*/
 
-	Queue: {
+	User: {
 		find: {
-			method: ['post']
-		},
-		delete: {
-			method: ['post']
+			method: ['get']
 		},
 		create: {
 			method: ['post']

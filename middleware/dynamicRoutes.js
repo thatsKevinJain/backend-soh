@@ -2,13 +2,16 @@ var routes = require('../config/routes')
 var authenticate = require('./authenticate') 
 
 // This will allow execution of async/await in middleware functions //
-const asyncHandler = fn => (req, res, next) =>
-	Promise
-	.resolve(fn(req, res, next))
-	.catch((err) =>{
-		console.log(err)
-		return res.status(400).json(err)
-	})
+function asyncHandler(fn) {
+	return function f(req, res, next){
+		Promise
+		.resolve(fn(req, res, next))
+		.catch((err) =>{
+			console.log(err)
+			return res.status(400).json(err)
+		})
+	}
+}
 
 module.exports = function(app){
 
