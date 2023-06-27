@@ -13,7 +13,7 @@ ajv.addKeyword('convertToObjectId', {
 		validate: function(data, dataPath){
 			if(ObjectId.isValid(data)){
 				if (typeof data == 'string' && ObjectId.isValid(data))
-					dataPath.parentData[dataPath.parentDataProperty] = ObjectId(data);
+					dataPath.parentData[dataPath.parentDataProperty] = new ObjectId(data);
 				return true
 			}
 			return false

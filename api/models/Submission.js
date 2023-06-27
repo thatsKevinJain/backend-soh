@@ -3,25 +3,22 @@
 module.exports = {
 	schema: {
 		type: 'object',
+		dynamicDefaults: {
+			createdAt: "datetime"
+		},
 		properties: {
-			_id: {
-				type: "string"
-			},
-			email:{
-				type: "string"
+			user: {
+				convertToObjectId: true
 			},
 			createdAt: {
 				format: "date-time",
 				type: "string"
 			},
-			updatedAt: {
-				format: "date-time",
-				type: "string"
-			},
-			demographic: {
+			answers: {
 				type: 'object'
 			}
 		},
+		required: ["user"],
 		additionalProperties: false
 	}
 }

@@ -13,6 +13,18 @@ module.exports = {
 		},
 		create: {
 			method: ['post']
+		},
+		update: {
+			method: ['post']
+		}
+	},
+
+	Submission: {
+		find: {
+			method: ['get']
+		},
+		create: {
+			method: ['post']
 		}
 	}
 }
