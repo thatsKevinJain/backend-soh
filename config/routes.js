@@ -26,5 +26,14 @@ module.exports = {
 		create: {
 			method: ['post']
 		}
+	},
+
+	App: {
+		getGame: {
+			method: ['get']
+		},
+		getDemographic: {
+			method: ['get']
+		}
 	}
 }
