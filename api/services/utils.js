@@ -79,11 +79,24 @@ const utils = {
 			}
 		}, 0)
 		return {
+			
+			// Total sum ==> (s1*w1 + s2*w2 + ... + sn*wn)
 			score: SCORE,
+
+			// Max score a user can get, this is set in the questionaire itself //
 			max_score: max_score,
+
+			// Sum of all weights of all questions (w1 + w2 + ... + wn) //
 			total_weight: TOTAL_WEIGHT,
+
+			// Value of ONE unit weight ==> (MAX_SCORE/TOTAL_WEIGHT)
 			effective_weight: W,
-			effective_score: SCORE*W
+
+			// Score that the user will see (FROM 0 --> MAX_SCORE) //
+			effective_score: SCORE*W,
+
+			// Score that we want to see (FROM 0 --> 10) //
+			normalized_score: (SCORE*10)/W
 		};
 	}
 }
