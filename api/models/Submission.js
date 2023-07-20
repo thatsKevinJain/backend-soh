@@ -16,6 +16,9 @@ module.exports = {
 			},
 			answers: {
 				type: 'object'
+			},
+			results: {
+				type: 'object'
 			}
 		},
 		required: ["user"],
