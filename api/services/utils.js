@@ -93,10 +93,10 @@ const utils = {
 			effective_weight: W,
 
 			// Score that the user will see (FROM 0 --> MAX_SCORE) //
-			effective_score: SCORE*W,
+			effective_score: parseInt(Math.floor(SCORE*W)),
 
 			// Score that we want to see (FROM 0 --> 10) //
-			normalized_score: (SCORE*10)/W
+			normalized_score: (SCORE*10)/TOTAL_WEIGHT
 		};
 	}
 }
