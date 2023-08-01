@@ -2,7 +2,7 @@
 const utils = {
 	
 	// Calculate score as per game logic //
-	getScore: function(submission, questions, max_score){
+	getScore: function(submission, questions, max_score, standardization_factor){
 
 		// Calculate the total number of questions //
 		const N = questions.length
@@ -30,73 +30,155 @@ const utils = {
 		const W = Math.floor(max_score / TOTAL_WEIGHT)
 		console.log("W", W)
 
+		// SCORES array --> this holds the standardized scores for each question //
+		const scores = {}
+
 		// Score //
 		const SCORE = questions.reduce((total_score, question, index, questions) => {
 
-			// Single Question //
-			if(!question.multiple) {
-				total_score += question.options.reduce((score, option) => {
+
+			// Format TEXT //
+			if(question.format === "text"){
+
+				// Single Question //
+				if(!question.multiple) {
+
+					// Get the question ID //
+					const id = question.id.toString()
 
 					// Capture the selection made by the user for the particular question //
-					const selection = submission.answers[question.id.toString()]
+					const selection = submission.answers[id]
 
-					// Calculate the effective score if the selection matches the current option //
-					if(selection === option.id){
-						score += (option.score * question.weight)
-						console.log("SINGLE", option.score * question.weight)
+					if(question.options && question.options.length > 0){
+						total_score += question.options.reduce((score, option) => {
+
+							// Calculate the effective score if the selection matches the current option //
+							if(selection === option.id){
+								score += (option.score * question.weight)
+							}
+							else{
+								score += 0
+							}
+
+							// Score standardization //
+							scores[id] = (score * standardization_factor)
+
+							return score
+						}, 0)
 					}
 					else{
-						score += 0
+						var score =  ((selection * question.weight) / question.max)
+						total_score += score
+						scores[id] = (score * standardization_factor)
 					}
-					return score
-				}, 0)
-				return total_score
-			}
+					
+					return total_score
+				}
 
-			// Multiple Questions //
-			// Iterate through each question and each option, multiply the score, sign and weight //
-			else {
+				// Multiple Questions //
+				// Iterate through each question and each option, multiply the score, sign and weight //
+				else {
 
-				total_score += question.questions.reduce((score, q, i) => {
+					total_score += question.questions.reduce((score, q, i) => {
 
-					score += question.options.reduce((s, o, j) => {
+						// Ger the question ID //
+						const id = question.id.toString() + "-" + (i+1).toString()
+
 						// Capture the selection made by the user for the particular question //
-						const selection = submission.answers[question.id.toString() + "-" + (i+1).toString()]
+						const selection = submission.answers[id]
 
-						// Calculate the effective score //
-						if(selection === o.id){
-							s += (o.score * question.weight * q.sign)
-							console.log("MUTLIPLE", (o.score * question.weight * q.sign))
+						if(question.options && question.options.length > 0){
+
+							score += question.options.reduce((s, o, j) => {
+
+								// Calculate the effective score //
+								if(selection === o.id){
+									/*
+										We apply the score based on their SIGN value
+										+1 means take the score AS IS
+										-1 means apply reverse code, here we flip the score by reducing it from 1.25
+									*/
+									if(q.sign > 0)
+										s += (o.score * question.weight)
+									else
+										s += ((1.25-o.score) * question.weight)
+								}
+								else{
+									s += 0
+								}
+								// Score standardization //
+								scores[id] = (s*standardization_factor)
+
+								return s
+							}, 0)
 						}
 						else{
-							s += 0
+							var s =  ((selection * question.weight) / question.max)
+							score += s
+							scores[id] = (s * standardization_factor)
 						}
-						return s
+
+						return score
 					}, 0)
-					return score
+					return total_score
+				}
+			}
+
+			// Format IMAGES //
+			if(question.format === "image"){
+				// Ger the question ID //
+				const id = question.id.toString()
+
+				// Capture the selection made by the user for the particular question //
+				const selections = (submission.answers[id]).split(",")
+				
+				// Maximum score allowed by this question //
+				let max = 0
+
+				var score = question.options.reduce((s, option, i) => {
+
+					// We do this to be able to standardize score later //
+					max += option.score
+
+					// Calculate the effective score //
+					if(selections.indexOf(option.id.toString()) > -1){
+						s += (option.score * question.weight)
+					}
+					else{
+						s += 0
+					}
+					return s
 				}, 0)
+
+				// Score standardization //
+				scores[id] = ((score * standardization_factor) / max)
+
+				total_score += score
 				return total_score
 			}
+
 		}, 0)
 		return {
-			
-			// Total sum ==> (s1*w1 + s2*w2 + ... + sn*wn)
-			score: SCORE,
+			results: {
+				// Total sum ==> (s1*w1 + s2*w2 + ... + sn*wn)
+				score: SCORE,
 
-			// Max score a user can get, this is set in the questionaire itself //
-			max_score: max_score,
+				// Max score a user can get, this is set in the questionaire itself //
+				max_score: max_score,
 
-			// Sum of all weights of all questions (w1 + w2 + ... + wn) //
-			total_weight: TOTAL_WEIGHT,
+				// Sum of all weights of all questions (w1 + w2 + ... + wn) //
+				total_weight: TOTAL_WEIGHT,
 
-			// Value of ONE unit weight ==> (MAX_SCORE/TOTAL_WEIGHT)
-			effective_weight: W,
+				// Value of ONE unit weight ==> (MAX_SCORE/TOTAL_WEIGHT)
+				effective_weight: W,
 
-			// Score that the user will see (FROM 0 --> MAX_SCORE) //
-			effective_score: parseInt(Math.floor(SCORE*W)),
+				// Score that the user will see (FROM 0 --> MAX_SCORE) //
+				effective_score: parseInt(Math.floor(SCORE*W)),
 
-			// Score that we want to see (FROM 0 --> 10) //
-			normalized_score: (SCORE*10)/TOTAL_WEIGHT
+				// Score that we want to see (FROM 0 --> 4) //
+				standardized_score: parseFloat(((SCORE*standardization_factor)/TOTAL_WEIGHT).toFixed(2))
+			},
+			scores: scores
 		};
 	}
 }

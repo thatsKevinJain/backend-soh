@@ -19,6 +19,9 @@ module.exports = {
 			},
 			results: {
 				type: 'object'
+			},
+			scores: {
+				type: 'object'
 			}
 		},
 		required: ["user"],

@@ -25,8 +25,8 @@ module.exports = {
 
 		// Calculate the score // 
 		const game = await db.collection(GAME).findOne({})
-		let results = utils.getScore(submission, game.questions, game.max_score)
-		submission = Object.assign({}, {results: results}, submission)
+		let results = utils.getScore(submission, game.questions, game.max_score, game.standardization_factor)
+		submission = Object.assign({}, {...results}, submission)
 
 		// Important step //
 		await validate(SUBMISSION, submission)
