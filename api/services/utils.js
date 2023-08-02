@@ -1,4 +1,16 @@
 
+function getAverage(id, scores){
+	let count = 0
+	let total = 0
+	for(const key in scores){
+		if(key.split("-")[0] === id){
+			count += 1
+			total += scores[key]
+		}
+	}
+	return (total/count)
+}
+
 const utils = {
 	
 	// Calculate score as per game logic //
@@ -33,7 +45,9 @@ const utils = {
 		// SCORES array --> this holds the standardized scores for each question //
 		const scores = {}
 
-		// Score //
+		/*
+			Calculate SCORE
+		*/
 		const SCORE = questions.reduce((total_score, question, index, questions) => {
 
 
@@ -158,6 +172,23 @@ const utils = {
 			}
 
 		}, 0)
+
+		/*
+			Calculate average score & fetch suggestion prompts based on scores
+		*/
+		var avg_scores = {}
+		var suggestions = {}
+
+		questions.forEach((question, index, questions) => {
+			const id = question.id.toString()
+
+			let average = getAverage(id, scores)
+			let group = Math.ceil(average)
+
+			avg_scores[id] = average
+			suggestions[id] = question.suggestions[group]
+		})
+
 		return {
 			results: {
 				// Total sum ==> (s1*w1 + s2*w2 + ... + sn*wn)
@@ -178,7 +209,9 @@ const utils = {
 				// Score that we want to see (FROM 0 --> 4) //
 				standardized_score: parseFloat(((SCORE*standardization_factor)/TOTAL_WEIGHT).toFixed(2))
 			},
-			scores: scores
+			scores: scores,
+			avg_scores: avg_scores,
+			suggestions: suggestions
 		};
 	}
 }

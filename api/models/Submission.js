@@ -22,6 +22,12 @@ module.exports = {
 			},
 			scores: {
 				type: 'object'
+			},
+			avg_scores: {
+				type: 'object'
+			},
+			suggestions: {
+				type: 'object'
 			}
 		},
 		required: ["user"],
