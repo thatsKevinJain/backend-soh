@@ -26,8 +26,8 @@ module.exports = {
 			avg_scores: {
 				type: 'object'
 			},
-			suggestions: {
-				type: 'object'
+			feedback: {
+				type: 'string'
 			}
 		},
 		required: ["user"],

@@ -14,7 +14,7 @@ function getAverage(id, scores){
 const utils = {
 	
 	// Calculate score as per game logic //
-	getScore: function(submission, questions, max_score, standardization_factor){
+	getScore: function(submission, questions, feedback, max_score, standardization_factor){
 
 		// Calculate the total number of questions //
 		const N = questions.length
@@ -177,7 +177,6 @@ const utils = {
 			Calculate average score & fetch suggestion prompts based on scores
 		*/
 		var avg_scores = {}
-		var suggestions = {}
 
 		questions.forEach((question, index, questions) => {
 			const id = question.id.toString()
@@ -186,8 +185,18 @@ const utils = {
 			let group = Math.ceil(average)
 
 			avg_scores[id] = average
-			suggestions[id] = question.suggestions[group]
 		})
+
+		var standardized_score = parseFloat(((SCORE*standardization_factor)/TOTAL_WEIGHT).toFixed(2))
+
+		var feedback = feedback.reduce((f, o, i) => {
+			var prev = feedback[i-1] ? feedback[i-1].value : 0
+			var curr = o.value
+			if(standardized_score >= prev && standardized_score <= curr){
+				f += o.text
+			}
+			return f
+		}, "").trim()
 
 		return {
 			results: {
@@ -207,11 +216,11 @@ const utils = {
 				effective_score: parseInt(Math.floor(SCORE*W)),
 
 				// Score that we want to see (FROM 0 --> 4) //
-				standardized_score: parseFloat(((SCORE*standardization_factor)/TOTAL_WEIGHT).toFixed(2))
+				standardized_score: standardized_score
 			},
 			scores: scores,
 			avg_scores: avg_scores,
-			suggestions: suggestions
+			feedback: feedback
 		};
 	}
 }
