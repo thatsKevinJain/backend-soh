@@ -21,7 +21,7 @@ const utils = {
 		console.log("N", N)
 
 		// Calculate the total weight of all questions combined //
-		const TOTAL_WEIGHT = questions.reduce((total_weight, question, index, questions) => {
+		const TOTAL_WEIGHT = questions.reduce((total_weight, question) => {
 
 			// Single Question //
 			if(!question.multiple){
@@ -48,7 +48,7 @@ const utils = {
 		/*
 			Calculate SCORE
 		*/
-		const SCORE = questions.reduce((total_score, question, index, questions) => {
+		const SCORE = questions.reduce((total_score, question) => {
 
 
 			// Format TEXT //
@@ -178,7 +178,7 @@ const utils = {
 		*/
 		var avg_scores = {}
 
-		questions.forEach((question, index, questions) => {
+		questions.forEach((question) => {
 			const id = question.id.toString()
 
 			let average = getAverage(id, scores)
