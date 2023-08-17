@@ -10,6 +10,9 @@ module.exports = {
 			email:{
 				type: "string"
 			},
+			name:{
+				type: "string"
+			},
 			createdAt: {
 				format: "date-time",
 				type: "string"
