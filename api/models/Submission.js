@@ -28,6 +28,9 @@ module.exports = {
 			},
 			feedback: {
 				type: 'string'
+			},
+			completed: {
+				type: 'boolean'
 			}
 		},
 		required: ["user"],

@@ -128,8 +128,8 @@ const utils = {
 						}
 						else{
 							var s =  ((selection * question.weight) / question.max)
-							score += s
-							scores[id] = (s * standardization_factor)
+							score += s ? s : 0
+							scores[id] = ((s ? s : 0) * standardization_factor)
 						}
 
 						return score

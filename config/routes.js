@@ -25,7 +25,13 @@ module.exports = {
 		},
 		create: {
 			method: ['post']
-		}
+		},
+		update: {
+			method: ['post']
+		},
+		finish: {
+			method: ['post']
+		},
 	},
 
 	App: {
