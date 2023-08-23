@@ -11,7 +11,11 @@ module.exports = {
 		const db = await mongo
 
 		const response = await db.collection(GAME).findOne({})
-		res.json(response)
+
+		const question = response.questions[req.query['i']]
+		const length = response.questions.length
+
+		res.json({ question, length })
 	},
 
 	getDemographic: async function(req, res){
