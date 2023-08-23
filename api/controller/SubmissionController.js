@@ -25,6 +25,7 @@ module.exports = {
 
 		// Important step //
 		await validate(SUBMISSION, submission)
+		submission['createdAt'] = new Date()
 
 		const response = await db.collection(SUBMISSION).insertOne(submission)
 		res.json({_id: response.insertedId})

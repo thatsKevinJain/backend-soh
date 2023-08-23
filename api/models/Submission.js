@@ -3,9 +3,6 @@
 module.exports = {
 	schema: {
 		type: 'object',
-		dynamicDefaults: {
-			createdAt: "datetime"
-		},
 		properties: {
 			user: {
 				convertToObjectId: true
