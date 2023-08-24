@@ -21,8 +21,8 @@ module.exports = {
 
 		const db_user = await db.collection(USER).findOne(user)
 
-		console.log(user);
-		console.log(db_user);
+		// console.log(user);
+		// console.log(db_user);
 
 		// Find one or create a new user //
 		if(db_user){
@@ -42,13 +42,13 @@ module.exports = {
 		const db = await mongo
 		const user = Object.assign({}, req.body)
 
-		console.log(user);
+		// console.log(user);
 
 		// Important step //
 		await validate(USER, user)
 		user['updatedAt'] = new Date()
 
-		console.log(user);
+		// console.log(user);
 
 		const response = await db.collection(USER).updateOne({_id: new db.ObjectId(user._id)}, {$set: {demographic: user.demographic}})
 		res.json(response)

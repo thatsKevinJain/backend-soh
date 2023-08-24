@@ -18,7 +18,7 @@ const utils = {
 
 		// Calculate the total number of questions //
 		const N = questions.length
-		console.log("N", N)
+		// console.log("N", N)
 
 		// Calculate the total weight of all questions combined //
 		const TOTAL_WEIGHT = questions.reduce((total_weight, question) => {
@@ -35,12 +35,12 @@ const utils = {
 
 			return total_weight
 		}, 0)
-		console.log("TOTAL_WEIGHT", TOTAL_WEIGHT)
+		// console.log("TOTAL_WEIGHT", TOTAL_WEIGHT)
 
 		// Calculate effective weight of one question //
 		// Math.floor() is used to make sure we never reach "max_score", this is *intentional*  //
 		const W = Math.floor(max_score / TOTAL_WEIGHT)
-		console.log("W", W)
+		// console.log("W", W)
 
 		// SCORES array --> this holds the standardized scores for each question //
 		const scores = {}

@@ -37,8 +37,8 @@ module.exports = {
 		const db = await mongo
 		let submission = await db.collection(SUBMISSION).findOne({user: new db.ObjectId(req.body.user), _id: new db.ObjectId(req.body._id)})
 
-		console.log(submission)
-		console.log(req.body)
+		// console.log(submission)
+		// console.log(req.body)
 
 		if(submission && !submission.completed){
 			let answers = Object.assign({}, {...submission.answers}, {...req.body.answers})
