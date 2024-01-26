@@ -198,6 +198,52 @@ const utils = {
 			return f
 		}, "").trim()
 
+		//////////////////////////////
+		// Generate Prompt for LLMs //
+		//////////////////////////////
+
+		// Base Prompt //
+		let prompt = "I want you to act as an happiness coach. \
+					Your goal is to provide summarized responses on how to improve my overall happiness levels. \
+					I am conducting a survey and each question deals with understanding the lifestyle of the respondant. \
+					I will provide the question along with the respondant's answer, your job is to give advices that can \
+					improve the overall happiness levels. Don't be rude and judgemental. \
+					Be very polite. At the very end, also provide some general advice on improving happiness. \
+					Summarize everything in just one paragraph for each question. \n\n"
+
+		// Append all answers to selected questions to the prompt //
+		let allowedQ = [1, 2, 3, 4, 5, 6]
+
+		for(let q of questions){
+
+			if(allowedQ.indexOf(q.id) > -1){
+				if(q.multiple){
+					prompt += q.id + ". " + q.title
+
+					if(q.questions && q.options){
+						for(let ques of q.questions){
+							for(let opts of q.options){
+								if(opts.id == submission.answers[`${q.id}-${ques.id}`])
+									prompt += `${q.id}-${ques.id}. ${ques.q}: ${opts.option}`
+							}
+						}
+					}
+				}
+				else{
+					// console.log(q.question)
+					if(q.type == "radio" || q.type == "checkbox")
+					{
+						if(q.format == "text"){
+							for(let opt of q.options){
+								if(opt.id == submission.answers[q.id.toString()])
+									prompt += `${q.id}. ${q.question}: ${opt.option}`
+							}
+						}
+					}
+				}
+			}
+		}
+
 		return {
 			results: {
 				// Total sum ==> (s1*w1 + s2*w2 + ... + sn*wn)
@@ -220,7 +266,8 @@ const utils = {
 			},
 			scores: scores,
 			avg_scores: avg_scores,
-			feedback: feedback
+			feedback: feedback,
+			prompt: prompt
 		};
 	}
 }
