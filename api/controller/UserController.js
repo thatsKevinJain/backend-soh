@@ -19,7 +19,7 @@ module.exports = {
 		const db = await mongo
 		const user = Object.assign({}, req.body)
 
-		const db_user = await db.collection(USER).findOne(user)
+		const db_user = await db.collection(USER).findOne({ email: user.email })
 
 		// console.log(user);
 		// console.log(db_user);
