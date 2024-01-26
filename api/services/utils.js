@@ -212,7 +212,7 @@ const utils = {
 
 			if(allowedQ.indexOf(q.id) > -1){
 				if(q.multiple){
-					prompt += q.id + ". " + q.title
+					prompt += q.id + ". " + q.title + "\n"
 
 					if(q.questions && q.options){
 						for(let ques of q.questions){
