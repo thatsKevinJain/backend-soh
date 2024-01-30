@@ -28,6 +28,12 @@ module.exports = {
 			},
 			completed: {
 				type: 'boolean'
+			},
+			prompt: {
+				type: 'string'
+			},
+			llmResponse: {
+				type: 'string'
 			}
 		},
 		required: ["user"],

@@ -203,7 +203,7 @@ const utils = {
 		//////////////////////////////
 
 		// Base Prompt //
-		let prompt = "I want you to act as an happiness coach. Your goal is to provide summarized responses on how to improve my overall happiness levels. I am conducting a survey and each question deals with understanding the lifestyle of the respondant. I will provide the question along with the respondant's answer, your job is to give advices that can improve the overall happiness levels. Don't be rude and judgemental. Be very polite. At the very end, also provide some general advice on improving happiness. Summarize everything in just one paragraph for each question. \n\n"
+		let prompt = ""
 
 		// Append all answers to selected questions to the prompt //
 		let allowedQ = [1, 2, 3, 4, 5, 6]
@@ -224,7 +224,6 @@ const utils = {
 					}
 				}
 				else{
-					// console.log(q.question)
 					if(q.type == "radio" || q.type == "checkbox")
 					{
 						if(q.format == "text"){
