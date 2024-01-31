@@ -82,22 +82,48 @@ module.exports = {
 		if(submission && !submission.llmResponse){
 			let prompt = submission.prompt
 
-			const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/run/${process.env.CF_MODEL}`,
-				{
-					method: "POST",
-					headers: { 'Authorization': `Bearer ${process.env.CF_API_KEY}` },
-					body: JSON.stringify({
-						"messages": [
-							{"role":"system","content": "I want you to act as an happiness coach. Your goal is to provide short responses on how to improve my overall happiness levels. I am conducting a survey and each question deals with understanding the lifestyle of the respondant. I will provide the question along with the respondant's answer, your job is to give super short advices that can improve the overall happiness levels. Don't be rude and judgemental. Be very polite. \n\n"},
-							{"role":"user","content": prompt}
-						]
-					})
-				});
-			const json = await response.json();
+		let response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/run/${process.env.CF_MODEL}`,
+			{
+				method: "POST",
+				headers: { 'Authorization': `Bearer ${process.env.CF_API_KEY}` },
+				body: JSON.stringify({
+					"stream": true,
+					"messages": [
+						{"role":"system","content": "Act as an happiness coach. There are questions and answers, based on the answers, give advices to improve happiness. Try to summarize, don't repeat any phrases and stick to advices only. Don't say \'to improve your happiness\'\n\n"},
+						{"role":"user","content": prompt}
+					]
+				})
+			}).then((response) => response.body)
+			  .then((body) => {
+			    let reader = body.getReader()
+				
+				return new ReadableStream({
+			      start(controller) {
+			        return pump();
 
-			submission = Object.assign({}, {...submission}, {llmResponse: json.result.response})
+			        function pump() {
+			          return reader.read().then(({ done, value }) => {
+
+			            // When no more data needs to be consumed, close the stream
+			            if (done) {
+			              controller.close();
+			              return;
+			            }
+			            controller.enqueue(value);
+			            return pump();
+			          });
+			        }
+			      },
+			    });
+			  })
+			  .then((stream) => new Response(stream))
+			  .then((response) => response.blob())
+			  .then((blob) => blob.text())
+			response = response.trim().split("data: [DONE]").join("").split("data: {\"response\":\"").join("").split("\"}\n\n").join("").trim()
+
+			submission = Object.assign({}, {...submission}, {llmResponse: response})
 			await db.collection(SUBMISSION).updateOne({_id: new db.ObjectId(req.body._id)}, {$set: submission})
-			res.json({ llmResponse: json.result.response })
+			res.json({ llmResponse: response })
 		}
 		else {
 			res.json({llmResponse: submission.llmResponse})

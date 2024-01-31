@@ -206,7 +206,7 @@ const utils = {
 		let prompt = ""
 
 		// Append all answers to selected questions to the prompt //
-		let allowedQ = [1, 2, 3, 4, 5, 6]
+		let allowedQ = [1, 3, 5, 6]
 
 		for(let q of questions){
 
