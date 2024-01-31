@@ -31,9 +31,6 @@ module.exports = {
 		},
 		finish: {
 			method: ['post']
-		},
-		getLLMResponse: {
-			method: ['post']
 		}
 	},
 

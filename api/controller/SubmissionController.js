@@ -13,7 +13,12 @@ module.exports = {
 		
 		const db = await mongo
 
-		const response = await db.collection(SUBMISSION).find({_id: new db.ObjectId(req.query['_id'])}).sort({_id: -1}).toArray()
+		const response = await db.collection(SUBMISSION).find({user: new db.ObjectId(req.query['_id']), completed: true}).sort({_id: -1}).toArray()
+
+		if(response.length > 1){
+			// console.log("OLD", response[response.length-1]['results'])
+			response[0]['oldResults'] = response[response.length-1]['results']
+		}
 		res.json(response[0])
 	},
 
@@ -61,7 +66,7 @@ module.exports = {
 		// Calculate the score //
 		if(submission && !submission.completed){
 			const game = await db.collection(GAME).findOne({})
-			let results = utils.getScore(submission, game.questions, game.feedback, game.max_score, game.standardization_factor)
+			let results = utils.getScore(submission, game.questions, game.feedback, game.images_feedback, game.max_score, game.standardization_factor)
 			submission = Object.assign({}, {...submission}, {...results}, {completed: true})
 
 			await db.collection(SUBMISSION).updateOne({_id: new db.ObjectId(req.body._id)}, {$set: submission})
@@ -70,63 +75,24 @@ module.exports = {
 		else{
 			res.status(400).send({message: 'Submission not found OR it is completed!'});
 		}
-	},
 
-	getLLMResponse: async function(req, res){
-
-		const db = await mongo
-
-		let submission = await db.collection(SUBMISSION).findOne({user: new db.ObjectId(req.body.user), _id: new db.ObjectId(req.body._id)})
-
-		// Calculate the score //
+		// load the LLM response async //
 		if(submission && !submission.llmResponse){
 			let prompt = submission.prompt
 
-		let response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/run/${process.env.CF_MODEL}`,
-			{
-				method: "POST",
-				headers: { 'Authorization': `Bearer ${process.env.CF_API_KEY}` },
-				body: JSON.stringify({
-					"stream": true,
-					"messages": [
-						{"role":"system","content": "Act as an happiness coach. There are questions and answers, based on the answers, give advices to improve happiness. Try to summarize, don't repeat any phrases and stick to advices only. Don't say \'to improve your happiness\'\n\n"},
-						{"role":"user","content": prompt}
-					]
-				})
-			}).then((response) => response.body)
-			  .then((body) => {
-			    let reader = body.getReader()
-				
-				return new ReadableStream({
-			      start(controller) {
-			        return pump();
-
-			        function pump() {
-			          return reader.read().then(({ done, value }) => {
-
-			            // When no more data needs to be consumed, close the stream
-			            if (done) {
-			              controller.close();
-			              return;
-			            }
-			            controller.enqueue(value);
-			            return pump();
-			          });
-			        }
-			      },
-			    });
-			  })
-			  .then((stream) => new Response(stream))
-			  .then((response) => response.blob())
-			  .then((blob) => blob.text())
-			response = response.trim().split("data: [DONE]").join("").split("data: {\"response\":\"").join("").split("\"}\n\n").join("").trim()
-
-			submission = Object.assign({}, {...submission}, {llmResponse: response})
-			await db.collection(SUBMISSION).updateOne({_id: new db.ObjectId(req.body._id)}, {$set: submission})
-			res.json({ llmResponse: response })
-		}
-		else {
-			res.json({llmResponse: submission.llmResponse})
+			for(var i=0; i<2; i++){
+				let response = await utils.getLLMResponse(prompt)
+				if(response.split("\"").includes("errors")){
+					console.log("Failed to get LLM response", i, response)
+					response = await utils.getLLMResponse(prompt)
+				}
+				else{
+					console.log("Got LLM Response at:", i)
+					submission = Object.assign({}, {...submission}, {llmResponse: response})
+					await db.collection(SUBMISSION).updateOne({_id: new db.ObjectId(req.body._id)}, {$set: submission})
+					break;
+				}
+			}
 		}
 	},
 }

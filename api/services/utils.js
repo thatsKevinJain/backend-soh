@@ -12,9 +12,51 @@ function getAverage(id, scores){
 }
 
 const utils = {
+
+	getLLMResponse: async function(prompt){
+		let response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/run/${process.env.CF_MODEL}`,
+		{
+			method: "POST",
+			headers: { 'Authorization': `Bearer ${process.env.CF_API_KEY}` },
+			body: JSON.stringify({
+				"stream": true,
+				"messages": [
+					{"role": "system", "content" :process.env.CF_PROMPT},
+					{"role":"user","content": prompt}
+				]
+			})
+		}).then((response) => response.body)
+		  .then((body) => {
+		    let reader = body.getReader()
+			
+			return new ReadableStream({
+		      start(controller) {
+		        return pump();
+
+		        function pump() {
+		          return reader.read().then(({ done, value }) => {
+
+		            // When no more data needs to be consumed, close the stream
+		            if (done) {
+		              controller.close();
+		              return;
+		            }
+		            controller.enqueue(value);
+		            return pump();
+		          });
+		        }
+		      },
+		    });
+		  })
+		  .then((stream) => new Response(stream))
+		  .then((response) => response.blob())
+		  .then((blob) => blob.text())
+		response = response.trim().split("data: [DONE]").join("").split("data: {\"response\":\"").join("").split("\"}\n\n").join("").trim()
+		return response
+	},
 	
 	// Calculate score as per game logic //
-	getScore: function(submission, questions, feedback, max_score, standardization_factor){
+	getScore: function(submission, questions, feedback, images_feedback, max_score, standardization_factor){
 
 		// Calculate the total number of questions //
 		const N = questions.length
@@ -198,6 +240,19 @@ const utils = {
 			return f
 		}, "").trim()
 
+
+		///////////////////////////////////////
+		// Generate Feedback for Eudaimonic  //
+		///////////////////////////////////////
+		var images_feedback = images_feedback.reduce((f, o, i) => {
+			var prev = images_feedback[i-1] ? images_feedback[i-1].value : 0
+			var curr = o.value
+			if(scores['10'] >= prev && scores['10'] <= curr){
+				f += o.text
+			}
+			return f
+		}, "").trim()
+
 		//////////////////////////////
 		// Generate Prompt for LLMs //
 		//////////////////////////////
@@ -260,6 +315,7 @@ const utils = {
 			scores: scores,
 			avg_scores: avg_scores,
 			feedback: feedback,
+			images_feedback: images_feedback,
 			prompt: prompt
 		};
 	}
